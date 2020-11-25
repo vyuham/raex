@@ -28,17 +28,25 @@ impl Color {
 
 /// TODO: Remove public interface when necessary implements made.
 pub struct Exec {
-    pub task: Task,
-    pub hash: u8,
-    pub data: Option<Vec<Color>>,
+    task: Task,
+    hash: u8,
+    data: Vec<Color>,
 }
 
 impl Exec {
+    pub fn new(
+        task: Task,
+        hash: u8,
+        data: Vec<Color>,
+    ) -> Self {
+        Self { task, hash, data }
+    }
+
     pub fn execute(self) -> Vec<u8> {
         match self.task {
             Task::MakeBW => {
                 let mut bw_vec: Vec<u8> = vec![];
-                for unit in self.data.unwrap() {
+                for unit in self.data {
                     bw_vec.push(unit.black_white());
                 }
                 bw_vec
