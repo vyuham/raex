@@ -1,6 +1,7 @@
 // The Executor is a set of components that execute code on data. Given a coloured image, we intend to generate a black and white image.
 use std::fmt::Debug;
 
+#[derive(Debug, PartialEq, Clone)]
 pub enum Task {
     /// Divides up the image into equal sized chunks of u8 matrices.
     Divide,
@@ -25,7 +26,7 @@ impl Color {
     }
 
     pub fn black_white_shade(self) -> Self {
-        let shade = ((0.3 * self.r as f64) + (0.59 * self.g as f64) + (0.11 * self.b as f64)) as u8;
+        let shade = (0.3 * self.r as f64 + 0.59 * self.g as f64 + 0.11 * self.b as f64) as u8;
         Self {r:shade, g:shade, b:shade}
     }
 }
@@ -36,6 +37,17 @@ pub enum Data {
     Line(Vec<Color>),
 }
 
+impl Data {
+    pub fn line(self) -> Vec<Color> {
+        if let Data::Line(inner) = self {
+            return inner;
+        } else {
+            return vec![];
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
 pub struct Exec {
     task: Task,
     hash: u8,
@@ -65,6 +77,19 @@ impl Exec {
                 self.data = Data::Line(bw_image);
                 self.task = Task::Collate;
             },
+            Task::Divide => {
+                let mut save: Data = Data::Line(vec![]);
+                if let Data::Image(image) = &self.data {
+                    for line_no in 0..image.len() {
+                        let mut line = Self::new(
+                            Task::MakeBW, line_no as u8, Data::Line((*image[line_no]).to_vec())
+                        );
+                        line.execute();
+                        save = line.data();
+                    }
+                }
+                self.data = Data::Image(vec![save.line()]);
+            }
             _ => todo!()
         }
     }
