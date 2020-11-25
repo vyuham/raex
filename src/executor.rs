@@ -30,33 +30,39 @@ impl Color {
     }
 }
 
+#[derive(Debug, PartialEq, Clone)]
+pub enum Data {
+    Image(Vec<Vec<Color>>),
+    Line(Vec<Color>),
+}
+
 pub struct Exec {
     task: Task,
     hash: u8,
-    data: Vec<Color>,
+    data: Data,
 }
 
 impl Exec {
     pub fn new(
         task: Task,
         hash: u8,
-        data: Vec<Color>,
+        data: Data,
     ) -> Self {
         Self { task, hash, data }
     }
 
-    pub fn data(self) -> Vec<Color> {
-        self.data
-    }
+    pub fn task(self) -> Task { self.task }
+    pub fn hash(self) -> u8 { self.hash }
+    pub fn data(self) -> Data { self.data }
 
     pub fn execute(&mut self) {
         match self.task {
             Task::MakeBW => {
                 let mut bw_image: Vec<Color> = vec![];
-                for unit in &self.data {
-                    bw_image.push(unit.black_white_shade());
+                if let Data::Line(line) = &self.data {
+                    for unit in line { bw_image.push(unit.black_white_shade()); }
                 }
-                self.data = bw_image;
+                self.data = Data::Line(bw_image);
                 self.task = Task::Collate;
             },
             _ => todo!()
