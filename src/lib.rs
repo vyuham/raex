@@ -25,7 +25,7 @@ mod tests {
         exec.execute();
         let s = 194.95f64 as u8;
         let expect = Exec::new(
-            Task::Divide, 0, Data::Image(vec![vec![Color::new(s, s, s)]])
+            Task::Done, 0, Data::Image(vec![vec![Color::new(s, s, s)]])
         );
         assert_eq!(exec, expect);
     }

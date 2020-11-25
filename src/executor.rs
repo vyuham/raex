@@ -63,7 +63,7 @@ impl Exec {
         Self { task, hash, data }
     }
 
-    pub fn task(self) -> Task { self.task }
+    pub fn task(&self) -> &Task { &self.task }
     pub fn hash(self) -> u8 { self.hash }
     pub fn data(self) -> Data { self.data }
 
@@ -78,19 +78,23 @@ impl Exec {
                 self.task = Task::Collate;
             },
             Task::Divide => {
-                let mut save: Data = Data::Line(vec![]);
+                let mut save: Vec<Vec<Color>> = vec![];
                 if let Data::Image(image) = &self.data {
                     for line_no in 0..image.len() {
                         let mut line = Self::new(
                             Task::MakeBW, line_no as u8, Data::Line((*image[line_no]).to_vec())
                         );
                         line.execute();
-                        save = line.data();
+                        match line.task() {
+                            Task::Collate => save.push(line.data().line()),
+                            _ => ()
+                        }
                     }
                 }
-                self.data = Data::Image(vec![save.line()]);
+                self.data = Data::Image(save);
+                self.task = Task::Done;
             }
-            _ => todo!()
+            _ => ()
         }
     }
 }
