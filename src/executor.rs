@@ -1,5 +1,5 @@
-// The Executor is a set of components that execute code on data. Given a coloured image, we intend to generate a 
-
+// The Executor is a set of components that execute code on data. Given a coloured image, we intend to generate a black and white image.
+use std::fmt::Debug;
 
 pub enum Task {
     /// Divides up the image into equal sized chunks of u8 matrices.
@@ -8,8 +8,11 @@ pub enum Task {
     MakeBW,
     /// Collate and generate final image.
     Collate,
+    /// Fully processed, no further execution.
+    Done
 }
 
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Color{
     r: u8, 
     g: u8,
@@ -21,12 +24,12 @@ impl Color {
         Self { r, g, b }
     }
 
-    pub fn black_white(self) -> u8 {
-        ((0.3 * self.r as f64) + (0.59 * self.g as f64) + (0.11 * self.b as f64)) as u8
+    pub fn black_white_shade(self) -> Self {
+        let shade = ((0.3 * self.r as f64) + (0.59 * self.g as f64) + (0.11 * self.b as f64)) as u8;
+        Self {r:shade, g:shade, b:shade}
     }
 }
 
-/// TODO: Remove public interface when necessary implements made.
 pub struct Exec {
     task: Task,
     hash: u8,
@@ -42,14 +45,19 @@ impl Exec {
         Self { task, hash, data }
     }
 
-    pub fn execute(self) -> Vec<u8> {
+    pub fn data(self) -> Vec<Color> {
+        self.data
+    }
+
+    pub fn execute(&mut self) {
         match self.task {
             Task::MakeBW => {
-                let mut bw_vec: Vec<u8> = vec![];
-                for unit in self.data {
-                    bw_vec.push(unit.black_white());
+                let mut bw_image: Vec<Color> = vec![];
+                for unit in &self.data {
+                    bw_image.push(unit.black_white_shade());
                 }
-                bw_vec
+                self.data = bw_image;
+                self.task = Task::Collate;
             },
             _ => todo!()
         }
