@@ -1,0 +1,1 @@
+<p align="center"><img src="docs/project_design.svg" width="350px"/></p>
