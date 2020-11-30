@@ -2,6 +2,7 @@ mod executor;
 pub use executor::{Color, Exec, Task, Data};
 
 mod scheduler;
+mod config;
 
 #[cfg(test)]
 mod tests {
