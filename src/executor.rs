@@ -9,8 +9,8 @@ pub enum Task {
     MakeBW,
     /// Collate and generate final image.
     Collate,
-    /// Fully processed, no further execution.
-    Done
+    /// Waiting for all sub-processes created to be completed.
+    Wait
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -49,52 +49,51 @@ impl Data {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Exec {
+    /// The type of processing to be applied on data.
     task: Task,
-    hash: u8,
+    /// UID used to refer to an execution unit.
+    /// TODO: Write code to generate the same.
+    hash: u32,
+    /// Data values to be processed.
     data: Data,
 }
 
 impl Exec {
     pub fn new(
         task: Task,
-        hash: u8,
+        hash: u32,
         data: Data,
     ) -> Self {
         Self { task, hash, data }
     }
 
     pub fn task(&self) -> &Task { &self.task }
-    pub fn hash(self) -> u8 { self.hash }
+    pub fn hash(self) -> u32 { self.hash }
     pub fn data(self) -> Data { self.data }
 
-    pub fn execute(&mut self) {
+    pub fn execute(&self) -> Vec<Self> {
         match self.task {
-            Task::MakeBW => {
-                let mut bw_image: Vec<Color> = vec![];
-                if let Data::Line(line) = &self.data {
-                    for unit in line { bw_image.push(unit.black_white_shade()); }
-                }
-                self.data = Data::Line(bw_image);
-                self.task = Task::Collate;
-            },
             Task::Divide => {
-                let mut save: Vec<Vec<Color>> = vec![];
+                let mut lines: Vec<Self> = vec![]; 
                 if let Data::Image(image) = &self.data {
                     for line_no in 0..image.len() {
-                        let mut line = Self::new(
-                            Task::MakeBW, line_no as u8, Data::Line((*image[line_no]).to_vec())
-                        );
-                        line.execute();
-                        match line.task() {
-                            Task::Collate => save.push(line.data().line()),
-                            _ => ()
-                        }
+                        // TODO: Store the lines of pixels in a global-datastrucutre that can later process it within the cluster.
+                        lines.push(Self::new(
+                            Task::MakeBW, line_no as u32, Data::Line((*image[line_no]).to_vec())
+                        ));
                     }
                 }
-                self.data = Data::Image(save);
-                self.task = Task::Done;
-            }
-            _ => ()
+                lines
+            },
+            Task::MakeBW => {
+                let mut bw_line: Vec<Color> = vec![];
+                if let Data::Line(line) = &self.data {
+                    for pixel in line { bw_line.push(pixel.black_white_shade()); }
+                }
+                // TODO: Store the processed values in a global-datastrucutre that can later collate it into the desired output.
+                vec![Self { task: Task::Collate, hash: 1000, data: Data::Line(bw_line) }]
+            },
+            _ => vec![]
         }
     }
 }
@@ -105,24 +104,22 @@ mod tests {
     #[test]
     fn black_white_test() {
         let image = Data::Line(vec![Color::new(163, 200, 255)]);
-        let mut exec = Exec::new(Task::MakeBW, 0, image);
-        exec.execute();
+        let exec = Exec::new(Task::MakeBW, 0, image);
         let s = 194.95f64 as u8;
-        let expect = Exec::new(
-            Task::Collate, 0, Data::Line(vec![Color::new(s, s, s)])
-        );
-        assert_eq!(exec, expect);
+        let expect = vec![Exec::new(
+            Task::Collate, 1000, Data::Line(vec![Color::new(s, s, s)])
+        )];
+        assert_eq!(exec.execute(), expect);
     }
 
     #[test]
     fn divide_image_test() {
-        let image = Data::Image(vec![vec![Color::new(163, 200, 255)]]);
-        let mut exec = Exec::new(Task::Divide, 0, image);
-        exec.execute();
-        let s = 194.95f64 as u8;
-        let expect = Exec::new(
-            Task::Done, 0, Data::Image(vec![vec![Color::new(s, s, s)]])
-        );
-        assert_eq!(exec, expect);
+        let pixel = Color::new(163, 200, 255);
+        let image = Data::Image(vec![vec![pixel]]);
+        let exec = Exec::new(Task::Divide, 0, image);
+        let expect = vec![Exec::new(
+            Task::MakeBW, 0, Data::Line(vec![pixel])
+        )];
+        assert_eq!(exec.execute(), expect);
     }
 }
