@@ -20,12 +20,9 @@ impl Sched {
         }
     }
 
-    pub fn schedule(&mut self, exec: Exec) {
-        self.scheduled.push_back(exec);
-    }
-
-    pub fn execute(&mut self) {
-        if let Some(exec) = self.scheduled.pop_front() {
+    pub fn next(&mut self) {
+        if !self.scheduled.is_empty() {
+            let exec = self.scheduled.pop_front().unwrap();
             self.executing.push(exec);
         } else {
             panic!()
