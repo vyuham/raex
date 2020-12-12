@@ -1,5 +1,7 @@
 // The Executor is a set of components that execute code on data. Given a coloured image, we intend to generate a black and white image.
 use std::fmt::Debug;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hasher, Hash};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Task {
@@ -11,6 +13,17 @@ pub enum Task {
     Collate,
     /// Waiting for all sub-processes created to be completed.
     Wait
+}
+
+impl Task {
+    pub fn description(&self) -> String {
+        match self {
+            Divide => "Divides input Image".to_string(),
+            MakeBW => "Black and White converter".to_string(),
+            Collate => "Final collector and assembler".to_string(),
+            Wait => "Suspended task".to_string(),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -45,6 +58,13 @@ impl Data {
             return vec![];
         }
     }
+
+    pub fn description(&self) -> String {
+        match self {
+            Image => "Image Matrix".to_string(),
+            Line => "Pixel Array".to_string(),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -53,23 +73,26 @@ pub struct Exec {
     task: Task,
     /// UID used to refer to an execution unit.
     /// TODO: Write code to generate the same.
-    hash: u32,
+    hash: u64,
     /// Data values to be processed.
     data: Data,
 }
 
 impl Exec {
-    pub fn new(
-        task: Task,
-        hash: u32,
-        data: Data,
-    ) -> Self {
-        Self { task, hash, data }
+    pub fn new(task: Task, data: Data) -> Self {
+        let mut hasher = DefaultHasher::new();
+        task.description().hash(&mut hasher);
+        data.description().hash(&mut hasher);
+        Self { task, hash: hasher.finish(), data }
     }
 
     pub fn task(&self) -> &Task { &self.task }
-    pub fn hash(self) -> u32 { self.hash }
+    pub fn hash(self) -> u64 { self.hash }
     pub fn data(self) -> Data { self.data }
+
+    pub fn in_words(&self) -> String {
+        format!("{}: {} on {}", self.hash, self.task.description(), self.data.description())
+    }
 
     pub fn execute(&self) -> Vec<Self> {
         match self.task {
@@ -79,7 +102,7 @@ impl Exec {
                     for line_no in 0..image.len() {
                         // TODO: Store the lines of pixels in a global-datastrucutre that can later process it within the cluster.
                         lines.push(Self::new(
-                            Task::MakeBW, line_no as u32, Data::Line((*image[line_no]).to_vec())
+                            Task::MakeBW, Data::Line((*image[line_no]).to_vec())
                         ));
                     }
                 }
@@ -91,7 +114,7 @@ impl Exec {
                     for pixel in line { bw_line.push(pixel.black_white_shade()); }
                 }
                 // TODO: Store the processed values in a global-datastrucutre that can later collate it into the desired output.
-                vec![Self { task: Task::Collate, hash: 1000, data: Data::Line(bw_line) }]
+                vec![Self::new(Task::Collate, Data::Line(bw_line))]
             },
             _ => vec![]
         }
@@ -104,10 +127,10 @@ mod tests {
     #[test]
     fn black_white_test() {
         let image = Data::Line(vec![Color::new(163, 200, 255)]);
-        let exec = Exec::new(Task::MakeBW, 0, image);
+        let exec = Exec::new(Task::MakeBW, image);
         let s = 194.95f64 as u8;
         let expect = vec![Exec::new(
-            Task::Collate, 1000, Data::Line(vec![Color::new(s, s, s)])
+            Task::Collate, Data::Line(vec![Color::new(s, s, s)])
         )];
         assert_eq!(exec.execute(), expect);
     }
@@ -116,10 +139,17 @@ mod tests {
     fn divide_image_test() {
         let pixel = Color::new(163, 200, 255);
         let image = Data::Image(vec![vec![pixel]]);
-        let exec = Exec::new(Task::Divide, 0, image);
+        let exec = Exec::new(Task::Divide, image);
         let expect = vec![Exec::new(
-            Task::MakeBW, 0, Data::Line(vec![pixel])
+            Task::MakeBW, Data::Line(vec![pixel])
         )];
         assert_eq!(exec.execute(), expect);
+    }
+
+    #[test]
+    fn exec_hash() {
+        let line = Data::Line(vec![Color::new(100,100,100)]);
+        let exec = Exec::new(Task::Collate, line);
+        assert_eq!(exec.hash(), 10041778673549373737);
     }
 }
