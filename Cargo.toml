@@ -7,3 +7,5 @@ edition = "2018"
 [dependencies]
 config = "0.10"
 serde = { version = "1.0", features = ["derive"] }
+dstore = { git="https://github.com/vyuham/dstore", branch="main" }
+tokio = { version = "0.2", features = ["macros", "sync", "stream", "time"] }
