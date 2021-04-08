@@ -5,7 +5,11 @@ authors = ["Devdutt Shenoi <devdutt@outlook.in>"]
 edition = "2018"
 
 [dependencies]
-config = "0.10"
-serde = { version = "1.0", features = ["derive"] }
-dstore = { git="https://github.com/vyuham/dstore", branch="main" }
+config = "0.11"
+serde = { version = "^1.0.8", features = ["derive"] }
+dstore = "0.1.2"
 tokio = { version = "0.2", features = ["macros", "sync", "stream", "time"] }
+tokio-test = "0.2"
+bytes = "1"
+lazy_static = "*"
+async-trait = "0.1"
