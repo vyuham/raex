@@ -1,29 +1,49 @@
-use raex::{RaEx, Scheduler};
-use std::collections::{HashMap, VecDeque};
+#[macro_use]
+extern crate async_trait;
+
+use raex::{Consensus, RaEx, RaExConfig, Scheduler};
+use std::sync::Arc;
 
 struct ExecUnit {}
 
-struct RenderSched {
-    schedule: VecDeque<ExecUnit>,
-    executing: HashMap<i8, ExecUnit>,
+struct RenderState {
+    consensus: Consensus<ExecUnit>,
+    config: Arc<RaExConfig>,
 }
 
-impl RenderSched {
-    fn new() -> Self {
+impl RenderState {
+    async fn new(config: Arc<RaExConfig>) -> Self {
         Self {
-            schedule: VecDeque::new(),
-            executing: HashMap::new(),
+            consensus: Consensus::start(config.clone()).await.unwrap(),
+            config,
         }
     }
 }
 
-impl Scheduler for RenderSched {
-    fn next(&mut self) {}
+#[async_trait]
+impl<T: Send + 'static> Scheduler<T> for RenderState {
+    async fn add(&mut self, next: T) {
+        unimplemented!();
+    }
 
-    fn execute(&mut self) {}
+    async fn next(&mut self) {
+        unimplemented!()
+    }
+
+    async fn execute(&mut self) {
+        unimplemented!()
+    }
+
+    async fn current(&mut self) -> T {
+        unimplemented!()
+    }
 }
 
 #[tokio::main]
 async fn main() {
-    RaEx::start("/tmp/raex", Box::new(RenderSched::new())).await;
+    let cfg = Arc::new(RaExConfig::new("examples/raex").unwrap());
+    let  mut raex: RaEx<ExecUnit> =
+        RaEx::start(cfg.clone(), Box::new(RenderState::new(cfg).await)).await;
+
+    raex.run().await;
 }

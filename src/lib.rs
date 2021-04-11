@@ -1,19 +1,29 @@
 //! RaEx is a tool to help you build high performance compute clusters, with which you can run
 //! computational tasks that would otherwise be incredibly inefficient on a single system.
 
+#[macro_use]
+extern crate async_trait;
+
+mod raft;
 mod scheduler;
 
 use config::{Config, ConfigError, File};
 use dstore::Local;
+pub use raft::Consensus;
 pub use scheduler::Scheduler;
 use serde::Deserialize;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
+mod raft_proto {
+    tonic::include_proto!("raft");
+}
+
 #[derive(Debug, Deserialize, Clone)]
 pub struct RaExConfig {
     pub global_addr: String,
     pub local_addr: String,
+    pub nodes: Vec<String>,
 }
 
 impl RaExConfig {
@@ -25,21 +35,33 @@ impl RaExConfig {
     }
 }
 
-pub struct RaEx {
+pub struct RaEx<T> {
     store: Arc<Mutex<Local>>,
-    config: RaExConfig,
-    scheduler: Box<dyn Scheduler>,
+    config: Arc<RaExConfig>,
+    scheduler: Box<dyn Scheduler<T>>,
+    running: Option<T>,
 }
 
-impl RaEx {
-    pub async fn start(config: &str, scheduler: Box<dyn Scheduler>) -> Self {
-        let config = RaExConfig::new(config).unwrap();
+impl<T: 'static> RaEx<T> {
+    pub async fn start(config: Arc<RaExConfig>, scheduler: Box<dyn Scheduler<T>>) -> Self {
+        let global_addr = config.global_addr.clone();
+        let local_addr = config.local_addr.clone();
         Self {
-            config: config.clone(),
-            store: Local::new(config.global_addr, config.local_addr)
-                .await
-                .unwrap(),
+            config,
+            store: Local::new(global_addr, local_addr).await.unwrap(),
             scheduler,
+            running: None,
+        }
+    }
+
+    pub async fn run(&mut self) {
+        loop {
+            if let None = self.running {
+                self.scheduler.next().await;
+                self.scheduler.execute().await;
+
+                self.running = Some(self.scheduler.current().await);
+            }
         }
     }
 }

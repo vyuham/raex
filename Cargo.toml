@@ -13,3 +13,8 @@ tokio-test = "0.2"
 bytes = "1"
 lazy_static = "*"
 async-trait = "0.1"
+tonic = "0.3"
+prost = "0.6"
+
+[build-dependencies]
+tonic-build = "0.3.0"
