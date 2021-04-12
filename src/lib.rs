@@ -4,7 +4,6 @@
 #[macro_use]
 extern crate async_trait;
 
-mod raft;
 mod scheduler;
 
 use config::{Config, ConfigError, File};
@@ -14,10 +13,6 @@ pub use scheduler::Scheduler;
 use serde::Deserialize;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-
-mod raft_proto {
-    tonic::include_proto!("raft");
-}
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct RaExConfig {
