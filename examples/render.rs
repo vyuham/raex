@@ -136,7 +136,9 @@ struct RenderState<T> {
 impl<T: Send + Sync + 'static> RenderState<T> {
     async fn new(config: Arc<RaExConfig>) -> Self {
         Self {
-            consensus: Consensus::<T>::start(config.local_addr.clone(), config.nodes.clone()).await.unwrap(),
+            consensus: Consensus::<T>::start(config.local_addr.clone(), config.nodes.clone())
+                .await
+                .unwrap(),
             config,
         }
     }
@@ -164,8 +166,8 @@ impl<T: Send + Sync + 'static> Scheduler<T> for RenderState<T> {
 #[tokio::main]
 async fn main() {
     let cfg = Arc::new(RaExConfig::new("examples/raex").unwrap());
-    let mut raex: RaEx<ExecUnit> =
-        RaEx::start(cfg.clone(), Box::new(RenderState::new(cfg).await)).await;
+    let mut raex =
+        RaEx::<ExecUnit>::start(cfg.clone(), Box::new(RenderState::new(cfg).await)).await;
 
     raex.run().await;
 }
