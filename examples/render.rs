@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate async_trait;
 
-use raex::{Consensus, RaEx, RaExConfig, Scheduler};
+use raex::{RaftNode, RaEx, RaExConfig, Scheduler};
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
@@ -23,10 +23,10 @@ pub enum Task {
 impl Task {
     pub fn description(&self) -> String {
         match self {
-            Divide => "Divides input Image".to_string(),
-            MakeBW => "Black and White converter".to_string(),
-            Collate => "Final collector and assembler".to_string(),
-            Wait => "Suspended task".to_string(),
+            Task::Divide => "Divides input Image".to_string(),
+            Task::MakeBW => "Black and White converter".to_string(),
+            Task::Collate => "Final collector and assembler".to_string(),
+            Task::Wait => "Suspended task".to_string(),
         }
     }
 }
@@ -70,8 +70,8 @@ impl Data {
 
     pub fn description(&self) -> String {
         match self {
-            Image => "Image Matrix".to_string(),
-            Line => "Pixel Array".to_string(),
+            Data::Image(_) => "Image Matrix".to_string(),
+            Data::Line(_) => "Pixel Array".to_string(),
         }
     }
 }
@@ -129,14 +129,14 @@ impl ExecUnit {
 }
 
 struct RenderState<T> {
-    consensus: Consensus<T>,
+    consensus: RaftNode<T>,
     config: Arc<RaExConfig>,
 }
 
 impl<T: Send + Sync + 'static> RenderState<T> {
     async fn new(config: Arc<RaExConfig>) -> Self {
         Self {
-            consensus: Consensus::<T>::start(config.local_addr.clone(), config.nodes.clone())
+            consensus: RaftNode::<T>::start(config.local_addr.clone(), config.nodes.clone())
                 .await
                 .unwrap(),
             config,

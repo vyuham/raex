@@ -8,7 +8,7 @@ mod scheduler;
 
 use config::{Config, ConfigError, File};
 use dstore::Local;
-pub use raft::Consensus;
+pub use raft::RaftNode;
 pub use scheduler::Scheduler;
 use serde::Deserialize;
 use std::sync::Arc;
