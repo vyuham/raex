@@ -1,7 +1,7 @@
 [submodule "components/raft"]
 	path = components/raft
-	url = git@github.com:vyuham/raft
+	url = https://github.com/vyuham/raft
 
 [submodule "components/dstore"]
         path = components/dstore
-        url = git@github.com:vyuham/dstore
+        url =  https://github.com/vyuham/dstore
