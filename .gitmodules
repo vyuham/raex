@@ -3,5 +3,10 @@
 	url = https://github.com/vyuham/raft
 
 [submodule "components/dstore"]
-        path = components/dstore
-        url =  https://github.com/vyuham/dstore
+	path = components/dstore
+	url =  https://github.com/vyuham/dstore
+	branch = with-queue
+
+[submodule "components/rtrcrs"]
+	path = components/rtrcrs
+	url = https://github.com/vyuham/rtrcrs
