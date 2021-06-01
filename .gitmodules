@@ -10,3 +10,4 @@
 [submodule "components/rtrcrs"]
 	path = components/rtrcrs
 	url = https://github.com/vyuham/rtrcrs
+	branch = parallelize

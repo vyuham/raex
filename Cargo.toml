@@ -6,17 +6,15 @@ edition = "2018"
 
 [workspace]
 members = [
-	"components/raft",
 	"components/dstore",
 	"components/rtrcrs",
-	]
+]
 
 [dependencies]
 async-trait = "0.1"
 config = "0.11"
 serde = { version = "^1.0.8", features = ["derive"] }
-dstore = { path = "components/dstore" } 
-raft = { path = "components/raft" }
+dstore = { path = "components/dstore" }
 rtrcrs = { path = "components/rtrcrs" }
 tokio = { version = "1.5", features = ["full"] }
 bytes = "1"
@@ -26,3 +24,19 @@ prost = "0.6"
 
 [build-dependencies]
 tonic-build = "0.3.0"
+
+[[bin]]
+name = "node"
+path = "src/node.rs"
+
+[[bin]]
+name = "unroll"
+path = "src/unroll.rs"
+
+[[bin]]
+name = "collect"
+path = "src/collect.rs"
+
+[[bin]]
+name = "queue"
+path = "src/queue.rs"
