@@ -13,6 +13,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         if let Ok(popped) = queue.pop_front(Bytes::from("tasks")).await {
             let popped = popped.to_vec();
             let (i, j) = ((popped[0] as u16) << 8 | popped[1] as u16, popped[2] as u16);
+            eprint!("[{}, {}] :", i, j);
             let pixel = tracer.render(i, j);
             let _ = local
                 .lock()
