@@ -9,12 +9,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("P3\n{} {}\n255", IMAGE_WIDTH, IMAGE_HEIGHT);
     for i in (0..IMAGE_WIDTH).into_iter().rev() {
         for j in 0..IMAGE_HEIGHT {
-            let pixel = local
+            let (_, pixel) = local
                 .lock()
                 .await
                 .get(&Bytes::from(vec![(i >> 8) as u8, i as u8, j as u8]))
-                .await?
-                .to_vec();
+                .await?;
             println!("{} {} {}", pixel[0], pixel[1], pixel[2]);
         }
     }
