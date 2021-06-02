@@ -15,8 +15,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .pop_front(Bytes::from("tasks"))
             .await
         {
-            let local_ref = local.clone();
-            let tracer_ref = tracer.clone();
+            let (local_ref, tracer_ref) = (local.clone(), tracer.clone());
             tokio::spawn(async move {
                 let popped = popped.to_vec();
                 let (i, j) = ((popped[0] as u16) << 8 | popped[1] as u16, popped[2] as u16);

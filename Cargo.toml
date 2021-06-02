@@ -27,16 +27,16 @@ tonic-build = "0.3.0"
 
 [[bin]]
 name = "node"
-path = "src/node.rs"
+path = "bin/node.rs"
 
 [[bin]]
 name = "unroll"
-path = "src/unroll.rs"
+path = "bin/unroll.rs"
 
 [[bin]]
 name = "collect"
-path = "src/collect.rs"
+path = "bin/collect.rs"
 
 [[bin]]
 name = "queue"
-path = "src/queue.rs"
+path = "bin/queue.rs"
