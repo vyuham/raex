@@ -39,5 +39,5 @@ name = "collect"
 path = "bin/collect.rs"
 
 [[bin]]
-name = "queue"
-path = "bin/queue.rs"
+name = "dstore"
+path = "bin/dstore.rs"

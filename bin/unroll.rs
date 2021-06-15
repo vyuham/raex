@@ -1,13 +1,15 @@
 use bytes::Bytes;
 use dstore::Queue;
 use raex::rtrc::{IMAGE_HEIGHT, IMAGE_WIDTH};
+use std::env;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut queue = Queue::connect("[::1]:50051").await?;
+    let args: Vec<String> = env::args().collect();
+
+    let mut queue = Queue::connect(&args[1]).await?;
     for i in (0..IMAGE_WIDTH).into_iter().rev() {
         for j in 0..IMAGE_HEIGHT {
-            eprint!("[{}, {}] ", i, j);
             let _ = queue
                 .push_back(
                     Bytes::from("tasks"),

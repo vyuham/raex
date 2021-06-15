@@ -1,16 +1,19 @@
 use bytes::Bytes;
 use dstore::{Local, Queue};
 use raex::rtrc::RayTracer;
-use std::sync::Arc;
+use std::{env, sync::Arc};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let args: Vec<String> = env::args().collect();
+    let (global_addr, local_addr) = (&args[1], &args[2]);
+    
     let (tracer, local) = (
         Arc::new(RayTracer::default()),
-        Local::new("[::1]:50051", "[::1]:50052").await?,
+        Local::new(global_addr, local_addr).await?,
     );
     loop {
-        if let Ok(popped) = Queue::connect("[::1]:50051")
+        if let Ok(popped) = Queue::connect(global_addr)
             .await?
             .pop_front(Bytes::from("tasks"))
             .await
