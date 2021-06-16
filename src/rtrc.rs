@@ -15,7 +15,7 @@ use rtrcrs::{
 const ASPECT_RATIO: f64 = 16.0 / 9.0;
 pub const IMAGE_WIDTH: i32 = 400;
 pub const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
-const SAMPLES_PER_PIXEL: i32 = 8;
+const SAMPLES_PER_PIXEL: i32 = 100;
 const MAX_DEPTH: i32 = 50;
 
 pub struct RayTracer {
@@ -26,7 +26,7 @@ pub struct RayTracer {
 impl RayTracer {
     pub fn default() -> Self {
         //World
-        let mut world = random_scene();
+        let mut world = HittableList::default();
 
         let material_ground = Arc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
         let material_center = Arc::new(Lambertian::new(Color::new(0.1, 0.2, 0.5)));
