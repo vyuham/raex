@@ -3,7 +3,7 @@ use std::sync::Arc;
 use rtrcrs::{
     camera::Camera,
     color::{anti_aliased, Color},
-    definitions::{random_double, random_scene},
+    definitions::random_double,
     hittable_list::HittableList,
     material::{Dielectric, Lambertian, Metal},
     ray::Point3,
@@ -28,36 +28,34 @@ impl RayTracer {
         //World
         let mut world = HittableList::default();
 
-        let material_ground = Arc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
-        let material_center = Arc::new(Lambertian::new(Color::new(0.1, 0.2, 0.5)));
-        let material_left = Arc::new(Dielectric::new(1.5));
-        let material_right = Arc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.0));
+        let ground_material = Arc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
+        world.add(Arc::new(Sphere::new(
+            Point3::new(0.0, -1000.0, 0.0),
+            1000.0,
+            ground_material,
+        )));
 
+        let material1 = Arc::new(Dielectric::new(1.5));
         world.add(Arc::new(Sphere::new(
-            Point3::new(0.0, -100.5, -1.0),
-            100.0,
-            material_ground,
+            Point3::new(0.0, 1.0, 0.0),
+            1.0,
+            material1,
         )));
+
+        let material2 = Arc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)));
         world.add(Arc::new(Sphere::new(
-            Point3::new(-1.0, 0.0, -1.0),
-            0.5,
-            material_left.clone(),
+            Point3::new(-4.0, 1.0, 0.0),
+            1.0,
+            material2,
         )));
+
+        let material3 = Arc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0));
         world.add(Arc::new(Sphere::new(
-            Point3::new(-1.0, 0.0, -1.0),
-            -0.45,
-            material_left,
+            Point3::new(4.0, 1.0, 0.0),
+            1.0,
+            material3,
         )));
-        world.add(Arc::new(Sphere::new(
-            Point3::new(1.0, 0.0, -1.0),
-            0.5,
-            material_right,
-        )));
-        world.add(Arc::new(Sphere::new(
-            Point3::new(0.0, 0.0, -1.0),
-            0.5,
-            material_center,
-        )));
+
         // Camera
         let camera = Camera::new(
             &Point3::new(13.0, 2.0, 3.0),

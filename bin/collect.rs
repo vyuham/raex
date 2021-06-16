@@ -1,6 +1,9 @@
 use bytes::Bytes;
 use dstore::Local;
-use raex::rtrc::{IMAGE_HEIGHT, IMAGE_WIDTH};
+use raex::{
+    coord_vec,
+    rtrc::{IMAGE_HEIGHT, IMAGE_WIDTH},
+};
 use std::{
     env,
     io::{stderr, Write},
@@ -21,7 +24,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let (_, pixel) = local
                 .lock()
                 .await
-                .get(&Bytes::from(vec![(i >> 8) as u8, i as u8, j as u8]))
+                .get(&Bytes::from(coord_vec(i as u16, j as u16)))
                 .await?;
             println!("{} {} {}", pixel[0], pixel[1], pixel[2]);
         }

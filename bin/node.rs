@@ -1,6 +1,6 @@
 use bytes::Bytes;
 use dstore::{Local, Queue};
-use raex::rtrc::RayTracer;
+use raex::{rtrc::RayTracer, vec_coord};
 use std::{
     env,
     io::{stderr, Write},
@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let (local_ref, tracer_ref) = (local.clone(), tracer.clone());
             tokio::spawn(async move {
                 let popped = popped.to_vec();
-                let (i, j) = ((popped[0] as u16) << 8 | popped[1] as u16, popped[2] as u16);
+                let (i, j) = vec_coord(&popped);
                 eprint!("\r[{}, {}]", i, j);
                 stderr().flush().unwrap();
                 let pixel = tracer_ref.render(i, j);
