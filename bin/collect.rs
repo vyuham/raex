@@ -1,8 +1,8 @@
 use bytes::Bytes;
 use dstore::Local;
 use raex::{
-    coord_vec,
     rtrc::{IMAGE_HEIGHT, IMAGE_WIDTH},
+    to_tuple,
 };
 use std::{
     env,
@@ -20,12 +20,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     for j in (0..IMAGE_HEIGHT).into_iter().rev() {
         eprint!("\rScanlines remaining: {} ", j);
         stderr().flush().unwrap();
-        for i in 0..IMAGE_WIDTH {
-            let (_, pixel) = local
-                .lock()
-                .await
-                .get(&Bytes::from(coord_vec(i as u16, j as u16)))
-                .await?;
+        let (_, pixels) = local
+            .lock()
+            .await
+            .get(&Bytes::from(to_tuple(j as u16)))
+            .await?;
+        for pixel in pixels.chunks(3) {
             println!("{} {} {}", pixel[0], pixel[1], pixel[2]);
         }
     }
