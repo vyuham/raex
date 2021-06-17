@@ -13,7 +13,7 @@ use rtrcrs::{
 
 // Image
 const ASPECT_RATIO: f64 = 16.0 / 9.0;
-pub const IMAGE_WIDTH: i32 = 400;
+pub const IMAGE_WIDTH: i32 = 1920;
 pub const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
 const SAMPLES_PER_PIXEL: i32 = 100;
 const MAX_DEPTH: i32 = 50;

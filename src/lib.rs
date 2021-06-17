@@ -2,10 +2,5 @@
 //! computational tasks that would otherwise be incredibly inefficient on a single system.
 pub mod rtrc;
 
-pub fn to_tuple(n: u16) -> Vec<u8> {
-    vec![(n >> 8) as u8, n as u8]
-}
-
-pub fn tuple_to(tuple: &Vec<u8>) -> u16 {
-    (tuple[0] as u16) << 8 | (tuple[1] as u16)
-}
+// Select a number that is divisor of IMAGE_HEIGHT
+pub const DIV: i32 = 108;

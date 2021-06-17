@@ -2,7 +2,7 @@ use bytes::Bytes;
 use dstore::Local;
 use raex::{
     rtrc::{IMAGE_HEIGHT, IMAGE_WIDTH},
-    to_tuple,
+    DIV,
 };
 use std::{
     env,
@@ -17,16 +17,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let local = Local::new(global_addr, local_addr).await?;
 
     println!("P3\n{} {}\n255", IMAGE_WIDTH, IMAGE_HEIGHT);
-    for j in (0..IMAGE_HEIGHT).into_iter().rev() {
-        eprint!("\rScanlines remaining: {} ", j);
+    for cursor in (0..IMAGE_HEIGHT / DIV).into_iter().rev() {
+        eprint!("\rCursor: {} ", cursor);
         stderr().flush().unwrap();
-        let (_, pixels) = local
+        if let Ok((_, pixels)) = local
             .lock()
             .await
-            .get(&Bytes::from(to_tuple(j as u16)))
-            .await?;
-        for pixel in pixels.chunks(3) {
-            println!("{} {} {}", pixel[0], pixel[1], pixel[2]);
+            .get(&Bytes::from(vec![cursor as u8]))
+            .await
+        {
+            for pixel in pixels.chunks(3) {
+                println!("{} {} {}", pixel[0], pixel[1], pixel[2]);
+            }
+        } else {
+            eprintln!("{}", cursor);
         }
     }
 
