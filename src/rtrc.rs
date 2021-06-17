@@ -28,6 +28,32 @@ impl RayTracer {
         //World
         let mut world = HittableList::default();
 
+        for a in -11..11 {
+            for b in -11..11 {
+                let center = Point3::new(a as f64 + 0.9, 0.2, b as f64 + 0.9);
+                let point = center - Point3::new(4.0, 0.2, 0.0);
+                if point.dot(&point).sqrt() > 0.9 {
+                    match ((if b == 0 { 0 } else {a / b}) as f64 * 100.0) as u8 {
+                        0..=33 => {
+                            let albedo = Color::new(0.3, 0.1, 0.3);
+                            let sphere_material = Arc::new(Lambertian::new(albedo));
+                            world.add(Arc::new(Sphere::new(center, 0.2, sphere_material)));
+                        }
+                        34..=66 => {
+                            let albedo = Color::new(0.5, 0.8, 0.9);
+                            let fuzz = 0.31415;
+                            let sphere_material = Arc::new(Metal::new(albedo, fuzz));
+                            world.add(Arc::new(Sphere::new(center, 0.2, sphere_material)));
+                        }
+                        _ => {
+                            let sphere_material = Arc::new(Dielectric::new(1.5));
+                            world.add(Arc::new(Sphere::new(center, 0.2, sphere_material)));
+                        }
+                    }
+                }
+            }
+        }
+
         let ground_material = Arc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
         world.add(Arc::new(Sphere::new(
             Point3::new(0.0, -1000.0, 0.0),
